@@ -5,12 +5,13 @@ $DEV_ENDPOINT = (aws cloudformation describe-stacks --stack-name sam-app-dev | C
 $PROD_ENDPOINT = (aws cloudformation describe-stacks --stack-name sam-app-prod | ConvertFrom-Json).Stacks.Outputs | Where-Object { $_.OutputValue -like "https://*" } | Select-Object -ExpandProperty OutputValue
 
 while ($true) {
-    $response = curl -s $DEV_ENDPOINT | ConvertFrom-Json
+    # Change 'Uri' parameter depending on which endpoint you want to test (DEV_ENDPOINT or PROD_ENDPOINT)
+    $response = Invoke-RestMethod -Uri $PROD_ENDPOINT
     $message = $response.message
-    $message | Out-File -Append -FilePath outputs.txt
+    $message | Out-File -Append -FilePath .\outputs.txt
     Write-Output $message
 
-    Start-Sleep -Seconds 1
+    Start-Sleep -Seconds 0.5
 
     # Exit loop if "q" is pressed
     if ([console]::KeyAvailable -and [console]::ReadKey($true).Key -eq 'Q') {
